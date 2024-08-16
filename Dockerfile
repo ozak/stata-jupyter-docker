@@ -1,8 +1,8 @@
-# docker build -t omerozak/econgrowthug-deepnote:v3 .
-# docker run -d -p 8888:8888 omerozak/econgrowthug-deepnote:v3
-# docker push omerozak/econgrowthug-deepnote:v3
-# Create docker for EconGrowthUG for use on Deeepnote
-FROM condaforge/mambaforge
+# docker build -t omerozak/stata-jupyter-docker
+# docker run -d -p 8888:8888 omerozak/stata-jupyter-docker
+# docker push omerozak/stata-jupyter-docker
+# Create docker with stata18-mp and mambaforge
+FROM dataeditors/stata18-mp
 
 # updates just in case
 RUN apt update
@@ -10,21 +10,38 @@ RUN apt update
 # Create
 ENV PROJ_LIB "/opt/conda/share/proj"
 
+# Install Miniforge (which includes Mamba)
+RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" \
+  && bash Miniforge3-$(uname)-$(uname -m).sh -b -p /opt/conda \
+  && rm Miniforge3-$(uname)-$(uname -m).sh
+
 # Create environment
 RUN conda install mamba -y -c conda-forge --override-channels
 
 # Initialize shell to work with conda
 RUN conda init bash
 
-# Install packages
-RUN mamba install -y -c conda-forge -c r --override-channels python=3.11 pip georasters geopandas pandas pandas-datareader spatialpandas statsmodels xlrd networkx ipykernel ipyparallel ipython ipython_genutils ipywidgets kiwisolver matplotlib-base matplotlib scikit-image scikit-learn scipy seaborn geoplot geopy geotiff pycountry nb_conda_kernels stata_kernel nltk plotly nodejs r-dagitty pycountry geocoder camelot-py html5lib ghostscript plotnine ipympl git ipumspy dask-geopandas python-kaleido numba jupyter jupyterlab numpy openpyxl opencv jinja2 r r-base r-irkernel rpy2 r-tidyr r-tibble r-dplyr \
-  && pip install --no-deps geonamescache stargazer dbnomics rdrobust pyfixest lets-plot RISE jupyterlab-rise git+https://github.com/ozak/google-drive-downloader 
+# Create and configure the country-stability environment
+RUN mamba create -y -n country-stability -c conda-forge --override-channels python=3.11 ipython dask dask-labextension geopandas geoplot georasters ipyparallel jupyter jupyterlab jupyter_contrib_nbextensions mapclassify matplotlib matplotlib-base nodejs numpy nb_conda_kernels pandas pandas-datareader plotly pip pycountry pyproj requests scipy seaborn shapely scikit-learn stata_kernel statsmodels unidecode xlrd \
+  && echo 'source activate country-stability' > /home/statauser/.bashrc \
+  && mamba run -n country-stability pip install geonamescache linearmodels isounidecode geocoder stargazer jupyter_nbextensions_configurator \
+  && mamba run -n country-stability python -m stata_kernel.install \
+  && mamba run -n country-stability jupyter lab build --dev-build \
+  && wget https://raw.githubusercontent.com/ticoneva/codemirror-legacy-stata/main/stata.js -P $CONDA_PREFIX/envs/country-stability/share/jupyter/lab/staging/node_modules/@codemirror/legacy-modes/mode/ \
+  && file="$CONDA_PREFIX/envs/country-stability/share/jupyter/lab/staging/node_modules/@jupyterlab/codemirror/lib/language.js" \
+  && squirrel_block="{name: 'Squirrel',displayName: trans.__('Squirrel'),mime: 'text/x-squirrel',extensions: ['nut'],async load() {const m = await import('@codemirror/legacy-modes/mode/clike');return legacy(m.squirrel);}}" \
+  && insert_text="{name: 'stata',displayName: trans.__('Stata'),mime: 'text/x-stata',extensions: ['do','ado'],async load() {const m = await import('@codemirror/legacy-modes/mode/stata');return legacy(m.stata);}}" \
+  && sed -i "/$squirrel_block/a $insert_text" "$file" \
+  && mamba run -n country-stability jupyter lab build --dev-build \
+  && mamba run -n country-stability python -m ipykernel install --user --name=conda-env-country-stability-py
 
-# Set the working directory inside the container
-WORKDIR /work
+# Set user and working directory
+USER statauser:stata
+WORKDIR /project
+VOLUME /project
 
-# Clone your Git repository
-RUN git clone https://github.com/SMU-Econ-Growth/EconGrowthUG-Notebooks.git .
+# Set environment activation command
+RUN echo "mamba activate country-stability" >> /home/statauser/.bashrc
 
 # Expose the port JupyterLab will run on (default is 9000)
 EXPOSE 9000
