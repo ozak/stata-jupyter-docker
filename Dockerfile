@@ -2,24 +2,46 @@
 # docker run -d -p 8888:8888 omerozak/stata-jupyter-docker
 # docker push omerozak/stata-jupyter-docker
 # Create docker with stata18-mp and mambaforge
-FROM dataeditors/stata18-mp:2024-08-07
 
-# Install Git and curl (if not already installed)
-RUN apt-get install -y git curl
+# syntax=docker/dockerfile:1.2
+
+# Parameters
+# This could be overridden when building 
+
+ARG STATAVERSION=18
+ARG STATATAG=2024-08-07
+ARG STATAHUBID=dataeditors
+
+
+## ================== Define base images =====================
+
+# define the source for Stata
+FROM ${STATAHUBID}/stata-mp${STATAVERSION}:${STATATAG} as stata
+
+# Create docker for replication
+FROM condaforge/mambaforge
+
+# updates just in case
+RUN apt update
+
+# Install Git (if not already installed)
+RUN apt-get install -y git
 
 # Create
 ENV PROJ_LIB "/opt/conda/share/proj"
-
-# Install Miniforge (which includes Mamba)
-RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" \
-  && bash Miniforge3-$(uname)-$(uname -m).sh -b -p /opt/conda \
-  && rm Miniforge3-$(uname)-$(uname -m).sh
 
 # Create environment
 RUN conda install mamba -y -c conda-forge --override-channels
 
 # Initialize shell to work with conda
 RUN conda init bash
+
+COPY --from=stata /usr/local/stata/ /usr/local/stata/
+RUN echo "export PATH=/usr/local/stata:${PATH}" >> /root/.bashrc
+ENV PATH "$PATH:/usr/local/stata" 
+
+# To run stata, you need to mount the Stata license file
+# by passing it in during runtime: -v stata.lic:/usr/local/stata/stata.lic
 
 # Create and configure the country-stability environment
 RUN mamba create -y -n country-stability -c conda-forge --override-channels python=3.11 ipython dask dask-labextension geopandas geoplot georasters ipyparallel jupyter jupyterlab jupyter_contrib_nbextensions mapclassify matplotlib matplotlib-base nodejs numpy nb_conda_kernels pandas pandas-datareader plotly pip pycountry pyproj requests scipy seaborn shapely scikit-learn stata_kernel statsmodels unidecode xlrd \
@@ -35,13 +57,8 @@ RUN mamba create -y -n country-stability -c conda-forge --override-channels pyth
   && mamba run -n country-stability jupyter lab build --dev-build \
   && mamba run -n country-stability python -m ipykernel install --user --name=conda-env-country-stability-py
 
-# Set user and working directory
-USER statauser:stata
-WORKDIR /project
-VOLUME /project
-
 # Set environment activation command
-RUN echo "mamba activate country-stability" >> /home/statauser/.bashrc
+RUN echo "mamba activate country-stability"  >> /root/.bashrc
 
 # Expose the port JupyterLab will run on (default is 9000)
 EXPOSE 9000
