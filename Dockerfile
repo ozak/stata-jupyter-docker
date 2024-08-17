@@ -4,11 +4,8 @@
 # Create docker with stata18-mp and mambaforge
 FROM dataeditors/stata18-mp:2024-08-07
 
-# Update and install necessary packages
-RUN apt-get update -o Acquire::Retries=3 && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  git curl \
-  && rm -rf /var/lib/apt/lists/*
+# Install Git and curl (if not already installed)
+RUN apt-get install -y git curl
 
 # Create
 ENV PROJ_LIB "/opt/conda/share/proj"
