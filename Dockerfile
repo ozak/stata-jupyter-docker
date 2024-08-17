@@ -2,7 +2,7 @@
 # docker run -d -p 8888:8888 omerozak/stata-jupyter-docker
 # docker push omerozak/stata-jupyter-docker
 # Create docker with stata18-mp and mambaforge
-FROM dataeditors/stata18-mp
+FROM dataeditors/stata18-mp:2024-08-07
 
 # updates just in case
 RUN apt update
