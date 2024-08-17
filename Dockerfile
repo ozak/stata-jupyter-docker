@@ -6,8 +6,12 @@ FROM dataeditors/stata18-mp:2024-08-07
 
 # updates just in case
 #RUN apt-get update
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y  \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  curl \
 
-# Create
+  # Create
 ENV PROJ_LIB "/opt/conda/share/proj"
 
 # Install Miniforge (which includes Mamba)
