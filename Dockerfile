@@ -5,7 +5,7 @@
 FROM dataeditors/stata18-mp:2024-08-07
 
 # updates just in case
-RUN apt update
+RUN apt-get update
 
 # Create
 ENV PROJ_LIB "/opt/conda/share/proj"
