@@ -4,14 +4,13 @@
 # Create docker with stata18-mp and mambaforge
 FROM dataeditors/stata18-mp:2024-08-07
 
-# updates just in case
-#RUN apt-get update
-RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y  \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  curl \
+# Update and install necessary packages
+RUN apt-get update -o Acquire::Retries=3 && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  git curl \
+  && rm -rf /var/lib/apt/lists/*
 
-  # Create
+# Create
 ENV PROJ_LIB "/opt/conda/share/proj"
 
 # Install Miniforge (which includes Mamba)
