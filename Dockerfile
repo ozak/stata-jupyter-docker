@@ -16,7 +16,8 @@ ARG STATAHUBID=dataeditors
 ## ================== Define base images =====================
 
 # define the source for Stata
-FROM ${STATAHUBID}/stata-mp${STATAVERSION}:${STATATAG} as stata
+#FROM ${STATAHUBID}/stata-mp${STATAVERSION}:${STATATAG} as stata
+FROM dataeditors/stata18-mp:2024-08-07 as stata
 
 # Create docker for replication
 FROM condaforge/mambaforge
