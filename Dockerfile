@@ -54,7 +54,9 @@ RUN conda init bash && mamba create -n country-stability -c conda-forge --overri
   && mamba activate country-stability \
   && mamba run -n country-stability pip install geonamescache linearmodels isounidecode geocoder stargazer jupyter_nbextensions_configurator \
   && mamba run -n country-stability python -m stata_kernel.install \
-  && mamba run -n country-stability jupyter lab build --dev-build \
+  && mamba run -n country-stability jupyter lab build --dev-build 
+
+RUN mamba activate country-stability \
   && wget https://raw.githubusercontent.com/ticoneva/codemirror-legacy-stata/main/stata.js -P $CONDA_PREFIX/envs/country-stability/share/jupyter/lab/staging/node_modules/@codemirror/legacy-modes/mode/ \
   && file="$CONDA_PREFIX/envs/country-stability/share/jupyter/lab/staging/node_modules/@jupyterlab/codemirror/lib/language.js" \
   && squirrel_block="{name: 'Squirrel',displayName: trans.__('Squirrel'),mime: 'text/x-squirrel',extensions: ['nut'],async load() {const m = await import('@codemirror/legacy-modes/mode/clike');return legacy(m.squirrel);}}" \
