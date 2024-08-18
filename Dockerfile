@@ -49,9 +49,9 @@ RUN conda init bash && mamba create -n country-stability -c conda-forge --overri
   dask=2023.6.0 dask-labextension=6.1.0 geopandas=0.12.2 geos=3.11.1 gdal=3.6.2 geoplot=0.5.1 georasters ipyparallel=8.4.1 \
   jupyter=1.0.0 jupyterlab=3.5.3 jupyter_contrib_nbextensions nb_conda_kernels=2.3.1 nbclassic=0.5.1 nbclient=0.7.2 \
   nbconvert=7.2.9 mapclassify matplotlib matplotlib-base nodejs numpy nb_conda_kernels pandas pandas-datareader plotly \
-  && mamba activate country-stability &&\
   pip pycountry pyproj requests scipy seaborn shapely scikit-learn stata_kernel statsmodels unidecode xlrd \
   && echo 'source activate country-stability' > ~/.bashrc \
+  && mamba activate country-stability \
   && mamba run -n country-stability pip install geonamescache linearmodels isounidecode geocoder stargazer jupyter_nbextensions_configurator \
   && mamba run -n country-stability python -m stata_kernel.install \
   && mamba run -n country-stability jupyter lab build --dev-build \
@@ -65,6 +65,7 @@ RUN conda init bash && mamba create -n country-stability -c conda-forge --overri
 
 # Set environment activation command
 RUN echo "mamba activate country-stability"  >> /root/.bashrc
+RUN echo "mamba activate country-stability"  >> /home/.bashrc
 
 # Expose the port JupyterLab will run on (default is 9000)
 EXPOSE 9000
