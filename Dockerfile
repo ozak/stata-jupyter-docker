@@ -54,18 +54,22 @@ RUN conda init && mamba init && mamba create -n country-stability -c conda-forge
   && mamba run -n country-stability pip install geonamescache linearmodels isounidecode geocoder stargazer jupyter_nbextensions_configurator \
   && mamba run -n country-stability python -m stata_kernel.install \
   && mamba run -n country-stability jupyter lab build --dev-build \
-  && mamba env list
+  && mamba env list \
+  && mamba activate country-stability 
 
   # Set environment activation command
 RUN echo "mamba activate country-stability"  >> /root/.bashrc
 RUN echo "mamba activate country-stability"  >> /home/.bashrc
+RUN echo "$CONDA_PREFIX"
 
-RUN mamba run -n country-stability && \
+#ENV CONDA_PREFIX "$CONDA_PREFIX"
+
+RUN mamba run -n country-stability \
   wget https://raw.githubusercontent.com/ticoneva/codemirror-legacy-stata/main/stata.js -P $CONDA_PREFIX/share/jupyter/lab/staging/node_modules/@codemirror/legacy-modes/mode/ && \
-  file="$CONDA_PREFIX/share/jupyter/lab/staging/node_modules/@jupyterlab/codemirror/lib/language.js" && \
-  squirrel_block="{name: 'Squirrel',displayName: trans.__('Squirrel'),mime: 'text/x-squirrel',extensions: ['nut'],async load() {const m = await import('@codemirror/legacy-modes/mode/clike');return legacy(m.squirrel);}}" && \
-  insert_text="{name: 'stata',displayName: trans.__('Stata'),mime: 'text/x-stata',extensions: ['do','ado'],async load() {const m = await import('@codemirror/legacy-modes/mode/stata');return legacy(m.stata);}}" && \
-  sed -i "/$(echo $squirrel_block | sed 's/[\/&]/\\&/g')/a $(echo $insert_text | sed 's/[\/&]/\\&/g')" "$file" && \
+  mamba run -n country-stability file="$CONDA_PREFIX/share/jupyter/lab/staging/node_modules/@jupyterlab/codemirror/lib/language.js" && \
+  mamba run -n country-stability  squirrel_block="{name: 'Squirrel',displayName: trans.__('Squirrel'),mime: 'text/x-squirrel',extensions: ['nut'],async load() {const m = await import('@codemirror/legacy-modes/mode/clike');return legacy(m.squirrel);}}" && \
+  mamba run -n country-stability  insert_text="{name: 'stata',displayName: trans.__('Stata'),mime: 'text/x-stata',extensions: ['do','ado'],async load() {const m = await import('@codemirror/legacy-modes/mode/stata');return legacy(m.stata);}}" && \
+  mamba run -n country-stability sed -i "/$(echo $squirrel_block | sed 's/[\/&]/\\&/g')/a $(echo $insert_text | sed 's/[\/&]/\\&/g')" "$file" && \
   mamba run -n country-stability jupyter lab build --dev-build && \
   mamba run -n country-stability python -m ipykernel install --user --name=conda-env-country-stability-py
 # Set environment activation command
