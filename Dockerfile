@@ -53,7 +53,8 @@ RUN conda init && mamba init && mamba create -n country-stability -c conda-forge
   && echo 'source activate country-stability' > ~/.bashrc \
   && mamba run -n country-stability pip install geonamescache linearmodels isounidecode geocoder stargazer jupyter_nbextensions_configurator \
   && mamba run -n country-stability python -m stata_kernel.install \
-  && mamba run -n country-stability jupyter lab build --dev-build 
+  && mamba run -n country-stability jupyter lab build --dev-build \
+  && mamba env list
 
 RUN mamba run -n country-stability \
   && wget https://raw.githubusercontent.com/ticoneva/codemirror-legacy-stata/main/stata.js -P $CONDA_PREFIX/envs/country-stability/share/jupyter/lab/staging/node_modules/@codemirror/legacy-modes/mode/ \
