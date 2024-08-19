@@ -61,8 +61,8 @@ RUN echo "mamba activate country-stability"  >> /root/.bashrc
 RUN echo "mamba activate country-stability"  >> /home/.bashrc
 
 RUN mamba run -n country-stability && \
-  wget https://raw.githubusercontent.com/ticoneva/codemirror-legacy-stata/main/stata.js -P $CONDA_PREFIX/envs/country-stability/share/jupyter/lab/staging/node_modules/@codemirror/legacy-modes/mode/ && \
-  file="$CONDA_PREFIX/envs/country-stability/share/jupyter/lab/staging/node_modules/@jupyterlab/codemirror/lib/language.js" && \
+  wget https://raw.githubusercontent.com/ticoneva/codemirror-legacy-stata/main/stata.js -P $CONDA_PREFIX/share/jupyter/lab/staging/node_modules/@codemirror/legacy-modes/mode/ && \
+  file="$CONDA_PREFIX/share/jupyter/lab/staging/node_modules/@jupyterlab/codemirror/lib/language.js" && \
   squirrel_block="{name: 'Squirrel',displayName: trans.__('Squirrel'),mime: 'text/x-squirrel',extensions: ['nut'],async load() {const m = await import('@codemirror/legacy-modes/mode/clike');return legacy(m.squirrel);}}" && \
   insert_text="{name: 'stata',displayName: trans.__('Stata'),mime: 'text/x-stata',extensions: ['do','ado'],async load() {const m = await import('@codemirror/legacy-modes/mode/stata');return legacy(m.stata);}}" && \
   sed -i "/$(echo $squirrel_block | sed 's/[\/&]/\\&/g')/a $(echo $insert_text | sed 's/[\/&]/\\&/g')" "$file" && \
