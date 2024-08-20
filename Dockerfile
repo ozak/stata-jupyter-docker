@@ -56,12 +56,13 @@ RUN conda init bash && mamba init bash && mamba create -n country-stability -c c
   && mamba run -n country-stability jupyter lab build --dev-build \
   && mamba env list
   
-RUN mamba activate country-stability 
+RUN /bin/bash -c "source activate country-stability"
+#RUN mamba activate country-stability 
 
 # Set environment activation command
-RUN echo "mamba activate country-stability"  >> /root/.bashrc
-RUN echo "mamba activate country-stability"  >> /home/.bashrc
-RUN echo "$CONDA_PREFIX"
+#RUN echo "mamba activate country-stability"  >> /root/.bashrc
+#RUN echo "mamba activate country-stability"  >> /home/.bashrc
+#RUN echo "$CONDA_PREFIX"
 
 #ENV CONDA_PREFIX "$CONDA_PREFIX"
 
@@ -74,9 +75,9 @@ RUN mamba run -n country-stability \
   mamba run -n country-stability jupyter lab build --dev-build && \
   mamba run -n country-stability python -m ipykernel install --user --name=conda-env-country-stability-py
 
-  # Set environment activation command
-RUN echo "mamba activate country-stability"  >> /root/.bashrc
-RUN echo "mamba activate country-stability"  >> /home/.bashrc
+# Set environment activation command
+RUN echo "source activate country-stability"  >> /root/.bashrc
+RUN echo "source activate country-stability"  >> /home/.bashrc
 
 RUN /bin/bash -c "source activate country-stability"
 
