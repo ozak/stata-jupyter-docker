@@ -39,18 +39,30 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set date variable
+        id: vars
+        run: |
+          echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+          REPO_NAME=$(echo "${GITHUB_REPOSITORY#*/}" | tr '[:upper:]' '[:lower:]')
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+          echo "Repository name in lowercase is: $REPO_NAME"  # Print REPO_NAME to log for debugging
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: |
-            omerozak/${{ github.repository }}
-            ghcr.io/${{ github.repository }}
+            omerozak/${{ env.REPO_NAME }}
+            ghcr.io/${{ env.REPO_NAME }}
+          tags: |
+            type=raw,value=${{ github.ref_name }}-${{ env.DATE }}
 
       - name: Build and push Docker images
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            omerozak/${{ env.REPO_NAME }}:${{ github.ref_name }}-${{ env.DATE }}
+            ghcr.io/${{ env.REPO_NAME }}:${{ github.ref_name }}-${{ env.DATE }}
           labels: ${{ steps.meta.outputs.labels }}
